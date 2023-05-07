@@ -2,20 +2,13 @@ import warnings
 import torch
 from typing import List, Tuple
 import json
-# import argparse
-
 import flwr as fl
 from flwr.common import Metrics
-
 import sys
 sys.path.append("client_class")
 
 from client_class.flower_client import FlowerClient
 
-
-# parser = argparse.ArgumentParser()
-# parser.add_argument("--round_num", dest="round_num", action="store")
-# parser.add_argument("--client_num", dest="client_num", action="store")
 with open("launcher_option.json", "r") as option_json:
     option = json.load(option_json)
 
@@ -51,8 +44,10 @@ for client_option in client_options:
     fl.client.start_numpy_client(
         # server_address="222.107.251.233:8080",
         server_address="0.0.0.0:8080",
-        client=FlowerClient(DEVICE),
-        batch_size=client_option["batch_size"],
-        data_size=client_option["data_size"],
+        client=FlowerClient(
+            DEVICE,
+            data_size=client_option["data_size"],
+            batch_size=client_option["batch_size"]
+        ),
         time_delay=client_option["delay"]
     )

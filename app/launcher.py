@@ -8,9 +8,9 @@ import flwr as fl
 from flwr.common import Metrics
 from multiprocessing import Process, Manager
 import sys
-sys.path.append("client_class")
+sys.path.append("client")
 
-from client_class.flower_client import FlowerClient
+from client.flower_client import FlowerClient
 
 
 # Define metric aggregation function

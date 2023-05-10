@@ -6,7 +6,7 @@ import time
 from logging import Logger
 import flwr as fl
 from flwr.common import Metrics
-from multiprocessing import Process
+from multiprocessing import Process, Manager
 import sys
 sys.path.append("client_class")
 
@@ -31,16 +31,25 @@ def run_server(server_address, config, strategy):
     )
 
 
-def run_client(server_address, device, data_size, batch_size, time_delay):
+def run_client(server_address, device, data_size, batch_size, time_delay, status_dict):
     fl.client.start_numpy_client(
         server_address=server_address,
         client=FlowerClient(
             device=device,
             data_size=data_size,
-            batch_size=batch_size
+            batch_size=batch_size,
+            status_dict=status_dict
         ),
         time_delay=time_delay
     )
+
+def print_status(status_dict : dict):
+    while(1):
+        for key in status_dict.keys():
+            print(key, status_dict[key])
+            if status_dict[key] > 0.95:
+                return
+
 
 if __name__ == "__main__":
     # logger = Logger()
@@ -55,8 +64,13 @@ if __name__ == "__main__":
     strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
     server_address = "0.0.0.0:8080"
 
-    # Start Flower Server
+
+    manager = Manager()
+    status_dict = manager.dict()
+
     process_list = []
+
+    # Start Flower Server
     server_proc = Process(
         target=run_server,
         args=(
@@ -66,9 +80,9 @@ if __name__ == "__main__":
         )
     )
     server_proc.start()
-    process_list.append(server_proc)
     print("server start")
     time.sleep(5)
+
 
     for client_option in client_options:
         client_proc = Process(
@@ -78,12 +92,17 @@ if __name__ == "__main__":
                 DEVICE,
                 client_option["data_size"],
                 client_option["batch_size"],
-                client_option["delay"]
+                client_option["delay"],
+                status_dict
             )
         )
         process_list.append(client_proc)
         client_proc.start()
-        print("client start")
+
+    print_prc = Process(target=print_status, args=(status_dict,))
+    print_prc.start()
 
     for process in process_list:
         process.join()
+
+    print(status_dict)

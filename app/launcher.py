@@ -2,9 +2,11 @@ import warnings
 import torch
 from typing import List, Tuple
 import json
+import time
+from logging import Logger
 import flwr as fl
 from flwr.common import Metrics
-from multiprocessing import Process, Queue
+from multiprocessing import Process
 import sys
 sys.path.append("client_class")
 
@@ -41,6 +43,7 @@ def run_client(server_address, device, data_size, batch_size, time_delay):
     )
 
 if __name__ == "__main__":
+    # logger = Logger()
     warnings.filterwarnings("ignore", category=UserWarning)
     DEVICE = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
@@ -52,7 +55,7 @@ if __name__ == "__main__":
     strategy = fl.server.strategy.FedAvg(evaluate_metrics_aggregation_fn=weighted_average)
     server_address = "0.0.0.0:8080"
 
-    # Start Flower client
+    # Start Flower Server
     process_list = []
     server_proc = Process(
         target=run_server,
@@ -64,6 +67,8 @@ if __name__ == "__main__":
     )
     server_proc.start()
     process_list.append(server_proc)
+    print("server start")
+    time.sleep(5)
 
     for client_option in client_options:
         client_proc = Process(
@@ -78,6 +83,7 @@ if __name__ == "__main__":
         )
         process_list.append(client_proc)
         client_proc.start()
+        print("client start")
 
     for process in process_list:
         process.join()

@@ -2,13 +2,14 @@ import flwr as fl
 import torch
 from collections import OrderedDict
 from custom_torch import CustomTorch
+import torch.utils.data as data_utils
 
 
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
 
-    def __init__(self, device):
-        self.custom_torch = CustomTorch(device)
+    def __init__(self, device, data_size = 1.0, batch_size = 0.0):
+        self.custom_torch = CustomTorch(device, data_size, batch_size)
         self.net = self.custom_torch.get_net()
 
     def get_parameters(self, config):

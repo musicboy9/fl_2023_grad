@@ -9,9 +9,11 @@ from net import Net
 
 class CustomTorch:
 
-    def __init__(self, device):
+    def __init__(self, device, data_size, batch_size):
         self.device = device
         self.net = Net().to(self.device)
+        self.data_size = data_size
+        self.batch_size = batch_size
 
     def get_net(self):
         return self.net
@@ -42,6 +44,13 @@ class CustomTorch:
     def load_data(self):
         """Load CIFAR-10 (training and test set)."""
         trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
         trainset = CIFAR10("./data", train=True, download=True, transform=trf)
+        custom_data_train_len = int(len(trainset) * self.data_size)
+        custom_trainset = torch.utils.data.random_split(trainset, [custom_data_train_len, len(trainset) - custom_data_train_len])[0]
+
         testset = CIFAR10("./data", train=False, download=True, transform=trf)
-        return DataLoader(trainset, batch_size=32, shuffle=True), DataLoader(testset)
+        custom_data_test_len = int(len(testset) * self.data_size)
+        custom_testset = torch.utils.data.random_split(testset, [custom_data_test_len, len(testset) - custom_data_test_len])[0]
+
+        return DataLoader(custom_trainset, batch_size=self.batch_size, shuffle=True), DataLoader(custom_testset)

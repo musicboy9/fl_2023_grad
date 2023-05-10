@@ -2,19 +2,18 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-import time
+from tqdm import tqdm
 
 from net import Net
 
 
 class CustomTorch:
 
-    def __init__(self, device, data_size, batch_size, status_dict):
+    def __init__(self, device, data_size, batch_size):
         self.device = device
         self.net = Net().to(self.device)
         self.data_size = data_size
         self.batch_size = batch_size
-        self.status_dict = status_dict
 
     def get_net(self):
         return self.net
@@ -24,13 +23,7 @@ class CustomTorch:
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(self.net.parameters(), lr=0.001, momentum=0.9)
         for _ in range(epochs):
-            current_time = time.time()
-            self.status_dict[current_time] = 0
-            i = 0
-            data_len = len(trainloader)
-            for images, labels in trainloader:
-                i += 1
-                self.status_dict[current_time] = i/data_len
+            for images, labels in tqdm(trainloader):
                 optimizer.zero_grad()
                 criterion(self.net(images.to(self.device)), labels.to(self.device)).backward()
                 optimizer.step()
@@ -40,7 +33,7 @@ class CustomTorch:
         criterion = torch.nn.CrossEntropyLoss()
         correct, loss = 0, 0.0
         with torch.no_grad():
-            for images, labels in testloader:
+            for images, labels in tqdm(testloader):
                 outputs = self.net(images.to(self.device))
                 labels = labels.to(self.device)
                 loss += criterion(outputs, labels).item()

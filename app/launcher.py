@@ -24,11 +24,12 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
-def run_server(server_address, config, strategy):
+def run_server(server_address, config, strategy, status_dict):
     fl.server.start_server(
         server_address=server_address,
         config=config,
         strategy=strategy,
+        status_dict=status_dict,
     )
 
 
@@ -47,15 +48,13 @@ def run_client(server_address, device, data_size, batch_size, time_delay, status
         client_id=client_id
     )
 
-def print_status(status_dict : dict, client_ids):
+def print_status(status_dict : dict):
     last_status = defaultdict(int)
-    client_ids = [0]
     while(1):
-        for client_id in client_ids:
-            if client_id in status_dict.keys():
-                if status_dict[client_id] != last_status[client_id]:
-                    print(status_dict[client_id])
-                    last_status[client_id] = status_dict[client_id]
+        for id in status_dict.keys():
+            if status_dict[id] != last_status[id]:
+                print(id, status_dict[id])
+                last_status[id] = status_dict[id]
 
 
 if __name__ == "__main__":
@@ -83,7 +82,8 @@ if __name__ == "__main__":
         args=(
             server_address,
             fl.server.ServerConfig(num_rounds=round_num),
-            strategy
+            strategy,
+            status_dict
         )
     )
     server_proc.start()
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         client_proc.start()
 
     client_ids = range(len(client_options))
-    print_prc = Process(target=print_status, args=(status_dict, client_ids,))
+    print_prc = Process(target=print_status, args=(status_dict,))
     print_prc.start()
     print_prc.join()
 

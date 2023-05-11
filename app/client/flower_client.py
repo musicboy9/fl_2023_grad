@@ -35,6 +35,7 @@ class FlowerClient(fl.client.NumPyClient):
         trainloader = self.get_trainloader()
         self.set_parameters(parameters)
         self.custom_torch.train(trainloader, epochs=1)
+        self.status_dict[self.client_id] = "fitting done"
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
@@ -42,4 +43,5 @@ class FlowerClient(fl.client.NumPyClient):
         testloader = self.get_testloader()
         self.set_parameters(parameters)
         loss, accuracy = self.custom_torch.test(testloader)
+        self.status_dict[self.client_id] = "eval done"
         return loss, len(testloader.dataset), {"accuracy": accuracy}

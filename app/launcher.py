@@ -1,11 +1,12 @@
 import warnings
+from collections import defaultdict
 import torch
 from typing import List, Tuple
 import json
 import time
 from logging import Logger
 import flwr as fl
-from flwr.common import Metrics
+from flwr.common import Metrics, date
 from multiprocessing import Process, Manager
 import sys
 sys.path.append("client")
@@ -23,32 +24,37 @@ def weighted_average(metrics: List[Tuple[int, Metrics]]) -> Metrics:
     return {"accuracy": sum(accuracies) / sum(examples)}
 
 
-def run_server(server_address, config, strategy):
+def run_server(server_address, config, strategy, status_dict):
     fl.server.start_server(
         server_address=server_address,
         config=config,
         strategy=strategy,
+        status_dict=status_dict,
     )
 
 
-def run_client(server_address, device, data_size, batch_size, time_delay, status_dict):
+def run_client(server_address, device, data_size, batch_size, time_delay, status_dict, client_id):
     fl.client.start_numpy_client(
         server_address=server_address,
         client=FlowerClient(
             device=device,
             data_size=data_size,
             batch_size=batch_size,
-            status_dict=status_dict
+            status_dict=status_dict,
+            client_id=client_id
         ),
-        time_delay=time_delay
+        time_delay=time_delay,
+        status_dict=status_dict,
+        client_id=client_id
     )
 
 def print_status(status_dict : dict):
+    last_status = defaultdict(int)
     while(1):
-        for key in status_dict.keys():
-            print(key, status_dict[key])
-            if status_dict[key] > 0.95:
-                return
+        for id in status_dict.keys():
+            if status_dict[id] != last_status[id]:
+                print(id, status_dict[id])
+                last_status[id] = status_dict[id]
 
 
 if __name__ == "__main__":
@@ -76,15 +82,15 @@ if __name__ == "__main__":
         args=(
             server_address,
             fl.server.ServerConfig(num_rounds=round_num),
-            strategy
+            strategy,
+            status_dict
         )
     )
     server_proc.start()
-    print("server start")
     time.sleep(5)
 
-
-    for client_option in client_options:
+    for client_id in range(len(client_options)):
+        client_option = client_options[client_id]
         client_proc = Process(
             target=run_client,
             args=(
@@ -93,16 +99,17 @@ if __name__ == "__main__":
                 client_option["data_size"],
                 client_option["batch_size"],
                 client_option["delay"],
-                status_dict
+                status_dict,
+                client_id
             )
         )
         process_list.append(client_proc)
         client_proc.start()
 
+    client_ids = range(len(client_options))
     print_prc = Process(target=print_status, args=(status_dict,))
     print_prc.start()
+    print_prc.join()
 
     for process in process_list:
         process.join()
-
-    print(status_dict)

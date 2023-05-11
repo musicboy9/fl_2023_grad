@@ -1,11 +1,12 @@
 import warnings
+from collections import defaultdict
 import torch
 from typing import List, Tuple
 import json
 import time
 from logging import Logger
 import flwr as fl
-from flwr.common import Metrics
+from flwr.common import Metrics, date
 from multiprocessing import Process, Manager
 import sys
 sys.path.append("client")
@@ -31,24 +32,30 @@ def run_server(server_address, config, strategy):
     )
 
 
-def run_client(server_address, device, data_size, batch_size, time_delay, status_dict):
+def run_client(server_address, device, data_size, batch_size, time_delay, status_dict, client_id):
     fl.client.start_numpy_client(
         server_address=server_address,
         client=FlowerClient(
             device=device,
             data_size=data_size,
             batch_size=batch_size,
-            status_dict=status_dict
+            status_dict=status_dict,
+            client_id=client_id
         ),
-        time_delay=time_delay
+        time_delay=time_delay,
+        status_dict=status_dict,
+        client_id=client_id
     )
 
-def print_status(status_dict : dict):
+def print_status(status_dict : dict, client_ids):
+    last_status = defaultdict(int)
+    client_ids = [0]
     while(1):
-        for key in status_dict.keys():
-            print(key, status_dict[key])
-            if status_dict[key] > 0.95:
-                return
+        for client_id in client_ids:
+            if client_id in status_dict.keys():
+                if status_dict[client_id] != last_status[client_id]:
+                    print(status_dict[client_id])
+                    last_status[client_id] = status_dict[client_id]
 
 
 if __name__ == "__main__":
@@ -80,11 +87,10 @@ if __name__ == "__main__":
         )
     )
     server_proc.start()
-    print("server start")
     time.sleep(5)
 
-
-    for client_option in client_options:
+    for client_id in range(len(client_options)):
+        client_option = client_options[client_id]
         client_proc = Process(
             target=run_client,
             args=(
@@ -93,16 +99,17 @@ if __name__ == "__main__":
                 client_option["data_size"],
                 client_option["batch_size"],
                 client_option["delay"],
-                status_dict
+                status_dict,
+                client_id
             )
         )
         process_list.append(client_proc)
         client_proc.start()
 
-    print_prc = Process(target=print_status, args=(status_dict,))
+    client_ids = range(len(client_options))
+    print_prc = Process(target=print_status, args=(status_dict, client_ids,))
     print_prc.start()
+    print_prc.join()
 
     for process in process_list:
         process.join()
-
-    print(status_dict)

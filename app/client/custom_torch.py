@@ -4,17 +4,20 @@ from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 import time
 
+from flwr.common import date
+
 from net import Net
 
 
 class CustomTorch:
 
-    def __init__(self, device, data_size, batch_size, status_dict):
+    def __init__(self, device, data_size, batch_size, status_dict, client_id):
         self.device = device
         self.net = Net().to(self.device)
         self.data_size = data_size
         self.batch_size = batch_size
         self.status_dict = status_dict
+        self.client_id = client_id
 
     def get_net(self):
         return self.net
@@ -24,13 +27,13 @@ class CustomTorch:
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(self.net.parameters(), lr=0.001, momentum=0.9)
         for _ in range(epochs):
-            current_time = time.time()
-            self.status_dict[current_time] = 0
+            self.status_dict[self.client_id] = [date.now(), 0]
             i = 0
             data_len = len(trainloader)
             for images, labels in trainloader:
                 i += 1
-                self.status_dict[current_time] = i/data_len
+                self.status_dict[self.client_id] = [date.now(), i/data_len]
+
                 optimizer.zero_grad()
                 criterion(self.net(images.to(self.device)), labels.to(self.device)).backward()
                 optimizer.step()

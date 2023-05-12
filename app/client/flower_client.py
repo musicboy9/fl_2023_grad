@@ -8,8 +8,8 @@ import torch.utils.data as data_utils
 # Define Flower client
 class FlowerClient(fl.client.NumPyClient):
 
-    def __init__(self, device, data_size = 1.0, batch_size = 0.0, status_dict = {}, client_id = -1):
-        self.custom_torch = CustomTorch(device, data_size, batch_size, status_dict, client_id)
+    def __init__(self, device, data_size = 1.0, batch_size = 0.0, status_dict = {}, client_id = -1, thread_num = 1):
+        self.custom_torch = CustomTorch(device, data_size, batch_size, status_dict, client_id, thread_num)
         self.net = self.custom_torch.get_net()
         self.status_dict = status_dict
         self.client_id = client_id

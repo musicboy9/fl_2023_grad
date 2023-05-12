@@ -54,10 +54,10 @@ class MyWidget(QtWidgets.QWidget):
 
                         qp = QPainter()
                         qp.begin(self)
-                        # qp.drawRect(pos[ 0 ], pos[ 1 ], self.max_width * self.status_dict[ (i, "data_size") ],
-                        #             self.col_height)
-                        current_width = self.max_width * (time.time() - self.time) / 30
-                        qp.drawRect(pos[ 0 ], pos[ 1 ], current_width, self.col_height)
+                        qp.drawRect(pos[ 0 ], pos[ 1 ], self.max_width * self.status_dict[ (i, "data_size") ],
+                                    self.col_height)
+                        # current_width = self.max_width * (time.time() - self.time) / 30
+                        # qp.drawRect(pos[ 0 ], pos[ 1 ], current_width, self.col_height)
 
                         brush = QBrush()
                         brush.setColor(QColor("#FFD141"))
@@ -65,15 +65,15 @@ class MyWidget(QtWidgets.QWidget):
                         qp.setBrush(brush)
                         rect = QtCore.QRect(pos[0],
                                             pos[1],
-                                            # int(
-                                            #     self.max_width *
-                                            #     self.status_dict[(i, "data_size")] *
-                                            #     (self.status_dict[(i, "train_result")][1] / self.status_dict[(i, "train_result")][2])
-                                            # ),
                                             int(
-                                                current_width *
+                                                self.max_width *
+                                                self.status_dict[(i, "data_size")] *
                                                 (self.status_dict[(i, "train_result")][1] / self.status_dict[(i, "train_result")][2])
                                             ),
+                                            # int(
+                                            #     current_width *
+                                            #     (self.status_dict[(i, "train_result")][1] / self.status_dict[(i, "train_result")][2])
+                                            # ),
                                             self.col_height)
                         qp.drawRect(rect)
                         qp.setPen(QtCore.Qt.black)

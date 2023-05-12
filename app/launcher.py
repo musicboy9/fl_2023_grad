@@ -35,7 +35,7 @@ def run_server(server_address, config, strategy, status_dict):
     )
 
 
-def run_client(server_address, device, data_size, batch_size, time_delay, status_dict, client_id):
+def run_client(server_address, device, data_size, batch_size, time_delay, thread_num, status_dict, client_id):
     fl.client.start_numpy_client(
         server_address=server_address,
         client=FlowerClient(
@@ -43,7 +43,8 @@ def run_client(server_address, device, data_size, batch_size, time_delay, status
             data_size=data_size,
             batch_size=batch_size,
             status_dict=status_dict,
-            client_id=client_id
+            client_id=client_id,
+            thread_num=thread_num
         ),
         time_delay=time_delay,
         status_dict=status_dict,
@@ -102,6 +103,7 @@ if __name__ == "__main__":
                 client_option["data_size"],
                 client_option["batch_size"],
                 client_option["delay"],
+                client_option["thread_num"],
                 status_dict,
                 client_id
             )

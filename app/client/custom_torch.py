@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-import time
+import psutil
 
 from flwr.common import date
 
@@ -11,26 +11,27 @@ from net import Net
 
 class CustomTorch:
 
-    def __init__(self, device, data_size, batch_size, status_dict, client_id):
+    def __init__(self, device, data_size, batch_size, status_dict, client_id, thread_num):
         self.device = device
         self.net = Net().to(self.device)
         self.data_size = data_size
         self.batch_size = batch_size
         self.status_dict = status_dict
         self.client_id = client_id
+        self.thread_num = thread_num
 
     def get_net(self):
         return self.net
 
     def train(self, trainloader, epochs):
         """Train the model on the training set."""
+        torch.set_num_threads(self.thread_num)
         self.status_dict[(self.client_id, "status")] = "training"
         criterion = torch.nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(self.net.parameters(), lr=0.001, momentum=0.9)
         for _ in range(epochs):
             i = 0
             data_len = len(trainloader)
-            print(data_len)
             self.status_dict[(self.client_id, "train_result")] = [date.now(), 0, data_len]
             self.status_dict[(self.client_id, "data_len")] = data_len
             for images, labels in trainloader:

@@ -1,5 +1,4 @@
 import warnings
-from collections import defaultdict
 import torch
 from typing import List, Tuple
 import json
@@ -14,8 +13,7 @@ sys.path.append("client")
 from client.flower_client import FlowerClient
 
 from viewer.progress_viewer import MyWidget
-from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtGui import QPainter
+from PyQt5 import QtWidgets
 
 
 # Define metric aggregation function
@@ -51,14 +49,6 @@ def run_client(server_address, device, data_size, batch_size, time_delay, status
         status_dict=status_dict,
         client_id=client_id
     )
-
-# def print_status(status_dict : dict):
-#     last_status = defaultdict(int)
-#     while(1):
-#         for id in status_dict.keys():
-#             if status_dict[id] != last_status[id]:
-#                 print(id, status_dict[id])
-#                 last_status[id] = status_dict[id]
 
 def show_app(status_dict):
     app = QtWidgets.QApplication(sys.argv)
@@ -118,11 +108,6 @@ if __name__ == "__main__":
         )
         process_list.append(client_proc)
         client_proc.start()
-
-    # client_ids = range(len(client_options))
-    # print_prc = Process(target=print_status, args=(status_dict,))
-    # print_prc.start()
-    # print_prc.join()
 
     for process in process_list:
         process.join()

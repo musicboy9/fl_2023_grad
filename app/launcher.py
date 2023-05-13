@@ -116,6 +116,8 @@ class Launcher:
     def __init_clients(self):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+        self.client_process_list = []
+
         for client_option in self.option[CLIENT_OPTIONS]:
             client_proc = Process(
                 target=run_client,
@@ -130,14 +132,16 @@ class Launcher:
                     self.status_dict
                 )
             )
-            self.process_list.append(client_proc)
+            self.client_process_list.append(client_proc)
 
 
     def run(self):
         for process in self.process_list:
             process.start()
             time.sleep(2)
-        for process in self.process_list:
+        for process in self.client_process_list:
+            process.start()
+        for process in (self.process_list + self.client_process_list):
             process.join()
 
 

@@ -21,12 +21,6 @@ class ProgressViewer(QtWidgets.QWidget):
         self.__init_fetcher()
 
         self.show()
-        self.showing = True
-
-        self.last_val_dict = defaultdict(int)
-
-        self.time = time.time()
-        self.time_set = False
 
     def __init_option(self, option):
         self.round_num = option[ROUND_NUM]
@@ -37,7 +31,7 @@ class ProgressViewer(QtWidgets.QWidget):
         self.margin = MARGIN
 
         self.col_height = 50
-        self.round_width = 400
+        self.round_width = 600
         self.server_width = 100
 
         window_height = (self.client_num + 1) * self.col_height + (self.client_num + 2) * self.margin
@@ -47,12 +41,9 @@ class ProgressViewer(QtWidgets.QWidget):
 
     def __init_progress_box(self):
         self.box_info_dict = {}
-        TRAIN = 0
-        EVAL = 1
-        type_list = [TRAIN, EVAL]
 
         def get_train_eval_width(width):
-            return int(width * 5 / 6), width - int(width * 5 / 6)
+            return int(width * 2 / 3), width - int(width * 2 / 3)
 
         def get_x_pos(round, type):
             if type == TRAIN:
@@ -92,51 +83,41 @@ class ProgressViewer(QtWidgets.QWidget):
 
         self.timer.start()
 
-    def __draw_box(self, box_info):
+    def __draw_box(self, box_info, progress=False, result=(1, 1)):
         qp = QPainter()
         qp.begin(self)
-        qp.drawRect(*box_info)
+        rect = QtCore.QRect(*box_info)
+        if progress:
+            brush = QBrush()
+            brush.setColor(QColor("#FFD141"))
+            brush.setStyle(QtCore.Qt.BrushStyle.Dense1Pattern)
+            qp.setBrush(brush)
+        qp.drawRect(rect)
+        if progress:
+            qp.setPen(QtCore.Qt.black)
+            qp.drawText(rect, QtCore.Qt.AlignCenter, str(result[0]) + "/" + str(result[1]))
         qp.end()
         self.update()
 
     def paintEvent(self, event):
         for key in self.box_info_dict.keys():
             self.__draw_box(self.box_info_dict[key])
-        # for i in range(len(self.pos_list)):
-        #     pos = self.pos_list[i]
-        #     if (i, "data_size") in self.status_dict:
-        #         if (i, "status") in self.status_dict and (i, "train_result") in self.status_dict:
-        #             if self.status_dict[(i, "status")] == "training":
-        #                 if not self.time_set:
-        #                     self.time = time.time()
-        #                     self.time_set = True
-        #
-        #                 qp = QPainter()
-        #                 qp.begin(self)
-        #                 qp.drawRect(pos[ 0 ], pos[ 1 ], self.max_width * self.status_dict[ (i, "data_size") ],
-        #                             self.col_height)
-        #
-        #                 brush = QBrush()
-        #                 brush.setColor(QColor("#FFD141"))
-        #                 brush.setStyle(QtCore.Qt.BrushStyle.Dense1Pattern)
-        #                 qp.setBrush(brush)
-        #                 rect = QtCore.QRect(pos[0],
-        #                                     pos[1],
-        #                                     int(
-        #                                         self.max_width *
-        #                                         self.status_dict[(i, "data_size")] *
-        #                                         (self.status_dict[(i, "train_result")][1] / self.status_dict[(i, "train_result")][2])
-        #                                     ),
-        #                                     self.col_height)
-        #                 qp.drawRect(rect)
-        #                 qp.setPen(QtCore.Qt.black)
-        #                 qp.drawText(rect, QtCore.Qt.AlignCenter, str(self.status_dict[(i, "train_result")][1]) + "/" + str(self.status_dict[(i, "train_result")][2]))
-        #                 qp.end()
 
+        for client_i in range(self.client_num):
+            for round in range(self.round_num):
+                for type in type_list:
+                    key = (client_i, round, type)
+                    if key not in self.status_dict:
+                        continue
+                    default_box_info = list(self.box_info_dict[key])
+                    default_width = default_box_info[2]
+                    progress = self.status_dict[key][1]
+                    data_len = self.status_dict[key][2]
+                    progress_width = default_width * progress / data_len
+                    default_box_info[2] = progress_width
+                    progress_box_info = tuple(default_box_info)
+                    self.__draw_box(progress_box_info, True, (progress, data_len))
 
     @QtCore.pyqtSlot()
     def fetch(self):
         self.update()
-
-    def getShowing(self):
-        return self.showing

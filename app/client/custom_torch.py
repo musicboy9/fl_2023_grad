@@ -2,7 +2,6 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-import psutil
 
 from flwr.common import date
 

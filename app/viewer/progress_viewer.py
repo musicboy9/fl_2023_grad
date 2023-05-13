@@ -41,11 +41,9 @@ class MyWidget(QtWidgets.QWidget):
         self.timer.start()
 
     def paintEvent(self, event):
-
-
         for i in range(len(self.pos_list)):
             pos = self.pos_list[i]
-            if ((i, "data_size") in self.status_dict):
+            if (i, "data_size") in self.status_dict:
                 if (i, "status") in self.status_dict and (i, "train_result") in self.status_dict:
                     if self.status_dict[(i, "status")] == "training":
                         if not self.time_set:
@@ -56,8 +54,6 @@ class MyWidget(QtWidgets.QWidget):
                         qp.begin(self)
                         qp.drawRect(pos[ 0 ], pos[ 1 ], self.max_width * self.status_dict[ (i, "data_size") ],
                                     self.col_height)
-                        # current_width = self.max_width * (time.time() - self.time) / 30
-                        # qp.drawRect(pos[ 0 ], pos[ 1 ], current_width, self.col_height)
 
                         brush = QBrush()
                         brush.setColor(QColor("#FFD141"))
@@ -70,10 +66,6 @@ class MyWidget(QtWidgets.QWidget):
                                                 self.status_dict[(i, "data_size")] *
                                                 (self.status_dict[(i, "train_result")][1] / self.status_dict[(i, "train_result")][2])
                                             ),
-                                            # int(
-                                            #     current_width *
-                                            #     (self.status_dict[(i, "train_result")][1] / self.status_dict[(i, "train_result")][2])
-                                            # ),
                                             self.col_height)
                         qp.drawRect(rect)
                         qp.setPen(QtCore.Qt.black)

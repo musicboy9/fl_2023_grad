@@ -6,6 +6,11 @@ BATCH_SIZE = "batch_size"
 DATA_SIZE = "data_size"
 DELAY = "delay"
 
+CLIENT_NUM = "client_num"
+
 TRAIN = 0
 EVAL = 1
-type_list = [ TRAIN, EVAL ]
+TYPE_LIST = [ TRAIN, EVAL ]
+
+LOG = "LOG"
+ROUND = "ROUND"

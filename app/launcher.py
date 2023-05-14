@@ -93,6 +93,9 @@ class Launcher:
     def __init_status(self):
         manager = Manager()
         self.status_dict = manager.dict()
+        self.status_dict[LOG] = ""
+        self.status_dict[CLIENT_NUM] = len(self.option[CLIENT_OPTIONS])
+        self.status_dict[ROUND_NUM] = self.option[ROUND_NUM]
 
     def __init_viewer(self):
         show_prc = Process(target=show_app, args=(self.status_dict, self.option,))
@@ -105,7 +108,7 @@ class Launcher:
             target=run_server,
             args=(
                 self.server_address,
-                fl.server.ServerConfig(num_rounds=self.option[ROUND_NUM]),
+                fl.server.ServerConfig(num_rounds=self.status_dict[ROUND_NUM]),
                 strategy,
                 self.status_dict
             )

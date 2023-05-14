@@ -2,7 +2,6 @@ import flwr as fl
 import torch
 from collections import OrderedDict
 from custom_torch import CustomTorch
-import socket
 
 
 # Define Flower client
@@ -32,17 +31,13 @@ class FlowerClient(fl.client.NumPyClient):
         self.net.load_state_dict(state_dict, strict=True)
 
     def fit(self, parameters, config):
-        self.status_dict[self.client_id] = "fitting start"
         trainloader = self.get_trainloader()
         self.set_parameters(parameters)
         self.custom_torch.train(trainloader, epochs=1)
-        self.status_dict[self.client_id] = "fitting done"
         return self.get_parameters(config={}), len(trainloader.dataset), {}
 
     def evaluate(self, parameters, config):
-        self.status_dict[self.client_id] = "eval start"
         testloader = self.get_testloader()
         self.set_parameters(parameters)
         loss, accuracy = self.custom_torch.test(testloader)
-        self.status_dict[self.client_id] = "eval done"
         return loss, len(testloader.dataset), {"accuracy": accuracy}

@@ -22,10 +22,12 @@ class ProgressViewer(QtWidgets.QWidget):
 
         self.show()
 
+        self.old_log = self.status_dict[LOG]
+
     def __init_option(self, option):
         self.round_num = option[ROUND_NUM]
         self.client_options = option[CLIENT_OPTIONS]
-        self.client_num = len(self.client_options)
+        self.client_num = self.status_dict[CLIENT_NUM]
 
     def __init_geometry(self):
         self.margin = MARGIN
@@ -63,7 +65,7 @@ class ProgressViewer(QtWidgets.QWidget):
 
         for client_i in range(self.client_num):
             for round in range(self.round_num):
-                for type in type_list:
+                for type in TYPE_LIST:
                     self.box_info_dict[(client_i, round, type)] = (get_x_pos(round, type),
                                                                    get_y_pos(client_i),
                                                                    get_width_pos(type),
@@ -105,7 +107,7 @@ class ProgressViewer(QtWidgets.QWidget):
 
         for client_i in range(self.client_num):
             for round in range(self.round_num):
-                for type in type_list:
+                for type in TYPE_LIST:
                     key = (client_i, round, type)
                     if key not in self.status_dict:
                         continue
@@ -120,4 +122,7 @@ class ProgressViewer(QtWidgets.QWidget):
 
     @QtCore.pyqtSlot()
     def fetch(self):
+        if self.status_dict[LOG] != self.old_log:
+            print(self.status_dict[LOG])
+            self.old_log = self.status_dict[LOG]
         self.update()

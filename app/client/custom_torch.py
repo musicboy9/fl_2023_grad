@@ -7,6 +7,22 @@ from net import Net
 from app.common_fixture import *
 
 
+def get_log_message(round, client_id, train=True, start=True):
+    result = ""
+    if train:
+        result += f"round {round}: client {client_id} training "
+        if start:
+            result += f"start\n"
+        else:
+            result += f"done\n"
+    else:
+        result += f"round {round}: client {client_id} evaluating "
+        if start:
+            result += f"start\n"
+        else:
+            result += f"done\n"
+    return result
+
 
 class CustomTorch:
 
@@ -18,7 +34,7 @@ class CustomTorch:
         self.status_dict = status_dict
         self.client_id = client_id
         self.thread_num = thread_num
-        self.round = 0
+        self.status_dict[ROUND] = 0
 
     def get_net(self):
         return self.net
@@ -26,7 +42,10 @@ class CustomTorch:
     def train(self, trainloader, epochs):
         """Train the model on the training set."""
         data_len = len(trainloader)
-        self.status_dict[ (self.client_id, self.round, TRAIN) ] = [ date.now(), 0, data_len ]
+
+        self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=True, start=True)
+
+        self.status_dict[ (self.client_id, self.status_dict[ROUND], TRAIN) ] = [ date.now(), 0, data_len ]
 
         torch.set_num_threads(self.thread_num)
         criterion = torch.nn.CrossEntropyLoss()
@@ -35,16 +54,21 @@ class CustomTorch:
             i = 0
             for images, labels in trainloader:
                 i += 1
-                self.status_dict[(self.client_id, self.round, TRAIN)] = [date.now(), i, data_len]
+                self.status_dict[(self.client_id, self.status_dict[ROUND], TRAIN)] = [date.now(), i, data_len]
 
                 optimizer.zero_grad()
                 criterion(self.net(images.to(self.device)), labels.to(self.device)).backward()
                 optimizer.step()
 
+        self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=True, start=False)
+
     def test(self, testloader):
         """Validate the model on the test set."""
         data_len = len(testloader)
-        self.status_dict[ (self.client_id, self.round, EVAL) ] = [ date.now(), 0, data_len ]
+
+        self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=False, start=True)
+
+        self.status_dict[ (self.client_id, self.status_dict[ROUND], EVAL) ] = [ date.now(), 0, data_len ]
 
         criterion = torch.nn.CrossEntropyLoss()
         correct, loss = 0, 0.0
@@ -52,7 +76,7 @@ class CustomTorch:
             i = 0
             for images, labels in testloader:
                 i += 1
-                self.status_dict[ (self.client_id, self.round, EVAL) ] = [ date.now(), i, data_len ]
+                self.status_dict[ (self.client_id, self.status_dict[ROUND], EVAL) ] = [ date.now(), i, data_len ]
 
                 outputs = self.net(images.to(self.device))
                 labels = labels.to(self.device)
@@ -60,7 +84,9 @@ class CustomTorch:
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
         accuracy = correct / len(testloader.dataset)
 
-        self.round += 1
+        self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=False, start=False)
+
+        self.status_dict[ROUND] += 1
         return loss, accuracy
 
     def load_data(self):

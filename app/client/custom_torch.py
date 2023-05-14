@@ -86,7 +86,11 @@ class CustomTorch:
 
         self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=False, start=False)
 
-        self.status_dict[ROUND] += 1
+        self.status_dict[TRAIN_CNT_OF_ROUND] += 1
+        if self.status_dict[TRAIN_CNT_OF_ROUND] == self.status_dict[CLIENT_NUM]:
+            # round done
+            self.status_dict[ROUND] += 1
+            self.status_dict[ TRAIN_CNT_OF_ROUND ] = 0
         return loss, accuracy
 
     def load_data(self):

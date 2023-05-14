@@ -36,8 +36,8 @@ class ProgressViewer(QtWidgets.QWidget):
         self.round_width = 600
         self.server_width = 100
 
-        window_height = (self.client_num + 1) * self.col_height + (self.client_num + 2) * self.margin
-        window_width = (self.round_width + self.server_width) * self.round_num + self.margin * 2
+        window_height = self.client_num * self.col_height + (self.client_num + 1) * self.margin
+        window_width = self.round_width * self.round_num + (self.round_num + 1) * self.margin
         self.setGeometry(30, 30, window_width, window_height)
         self.max_width = self.geometry().width() - 2 * self.margin
 
@@ -49,9 +49,9 @@ class ProgressViewer(QtWidgets.QWidget):
 
         def get_x_pos(round, type):
             if type == TRAIN:
-                return self.margin + (self.round_width + self.server_width) * round
+                return self.margin + (self.round_width + self.margin) * round
             else:
-                return self.margin + (self.round_width + self.server_width) * round +\
+                return self.margin + (self.round_width + self.margin) * round +\
                        get_train_eval_width(self.round_width * self.client_options[client_i][DATA_SIZE])[0]
 
         def get_y_pos(client_i):
@@ -70,12 +70,6 @@ class ProgressViewer(QtWidgets.QWidget):
                                                                    get_y_pos(client_i),
                                                                    get_width_pos(type),
                                                                    get_height_pos())
-        self.server_id = -1
-        for round in range(self.round_num):
-            self.box_info_dict[(self.server_id, round)] = (self.margin + self.round_width + (self.round_width + self.server_width) * round,
-                                                           (self.margin + self.col_height) * self.client_num + self.margin,
-                                                           self.server_width,
-                                                           self.col_height)
 
     def __init_fetcher(self):
         self.timer = QtCore.QTimer(self)

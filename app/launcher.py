@@ -96,6 +96,7 @@ class Launcher:
         self.status_dict[LOG] = ""
         self.status_dict[CLIENT_NUM] = len(self.option[CLIENT_OPTIONS])
         self.status_dict[ROUND_NUM] = self.option[ROUND_NUM]
+        self.status_dict[TRAIN_CNT_OF_ROUND] = 0
 
     def __init_viewer(self):
         show_prc = Process(target=show_app, args=(self.status_dict, self.option,))

@@ -8,7 +8,7 @@ from app.common_fixture import *
 
 
 def get_log_message(round, client_id, train=True, start=True):
-    result = f"{date.now()}, "
+    result = f"{date.now_custom()}, "
     if train:
         result += f"round {round}: client {client_id} training "
         if start:

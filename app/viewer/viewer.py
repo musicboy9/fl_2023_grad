@@ -8,12 +8,15 @@ from app.common_fixture import *
 
 class Viewer(QWidget):
 
-    def __init__(self, status_dict, option):
+    def __init__(self, status_dict, option, screen_size):
         super().__init__()
 
         self.setWindowTitle("FL Viewer")
         self.status_dict = status_dict
         self.option = option
+
+        self.setMaximumSize(screen_size)
+        self.screen_size = screen_size
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(MARGIN, MARGIN, MARGIN, MARGIN)
@@ -26,17 +29,18 @@ class Viewer(QWidget):
 
     def __init_progress_label(self):
         self.progress_label = ProgressLabel(self.status_dict, self.option)
+
         self.window_width = self.progress_label.get_width() + MARGIN * 2
-        self.window_height = self.progress_label.get_height() * 2 + MARGIN * 2
+        self.window_height = self.progress_label.get_height() + 340 + MARGIN * 2
         self.setGeometry(0, 0, self.window_width, self.window_height)
 
-        self.progress_label.setMinimumHeight(self.progress_label.get_height())
-        self.progress_label.setMinimumWidth(self.window_width)
-
-        self.layout.addWidget(self.progress_label)
+        s = QScrollArea()
+        s.setWidget(self.progress_label)
+        self.layout.addWidget(s)
 
     def __init_log_label(self):
         self.log_label = LogLabel()
+        self.log_label.setFixedHeight(300)
         self.log_label.setMaximumWidth(self.window_width)
         self.layout.addWidget(self.log_label)
 
@@ -53,4 +57,3 @@ class Viewer(QWidget):
         self.progress_label.update()
 
         self.log_label.set_text(self.status_dict[LOG])
-        # self.log_label.update()

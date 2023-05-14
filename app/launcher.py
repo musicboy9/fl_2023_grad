@@ -31,7 +31,9 @@ def weighted_average(metrics: List[ Tuple[ int, Metrics ] ]) -> Metrics:
 
 def show_app(status_dict, option):
     app = QtWidgets.QApplication(sys.argv)
-    viewer = Viewer(status_dict, option)
+    screen = app.primaryScreen()
+    screen_size = screen.size()
+    viewer = Viewer(status_dict, option, screen_size)
     viewer.show()
     app.aboutToQuit.connect(app.deleteLater)
     sys.exit(app.exec_())

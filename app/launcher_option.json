@@ -1,6 +1,6 @@
 {
-  "round_num": 3,
-  "client_info": [
+  "round_num": 100,
+  "client_options": [
     {
       "client_id": 0,
       "thread_num": 1,
@@ -11,9 +11,30 @@
     {
       "client_id": 1,
       "thread_num": 6,
+      "batch_size": 16,
+      "data_size": 0.3,
+      "delay": 2.0
+    },
+    {
+      "client_id": 2,
+      "thread_num": 4,
       "batch_size": 32,
-      "data_size": 0.5,
-      "delay": 0.0
+      "data_size": 0.4,
+      "delay": 1.0
+    },
+    {
+      "client_id": 3,
+      "thread_num": 4,
+      "batch_size": 32,
+      "data_size": 0.8,
+      "delay": 1.0
+    },
+    {
+      "client_id": 4,
+      "thread_num": 6,
+      "batch_size": 32,
+      "data_size": 0.9,
+      "delay": 5.0
     }
   ]
 }

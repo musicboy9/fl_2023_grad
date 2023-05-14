@@ -13,16 +13,11 @@ sys.path.append("client")
 
 from client.flower_client import FlowerClient
 
-from viewer.progress_viewer import MyWidget
+from viewer.viewer import Viewer
+
 from PyQt5 import QtWidgets
 
-ROUND_NUM = "round_num"
-CLIENT_INFO = "client_info"
-THREAD_NUM = "thread_num"
-BATCH_SIZE = "batch_size"
-DATA_SIZE = "data_size"
-DELAY = "delay"
-CLIENT_ID = "client_id"
+from common_fixture import *
 
 
 def weighted_average(metrics: List[ Tuple[ int, Metrics ] ]) -> Metrics:
@@ -32,6 +27,16 @@ def weighted_average(metrics: List[ Tuple[ int, Metrics ] ]) -> Metrics:
 
     # Aggregate and return custom metric (weighted average)
     return {"accuracy": sum(accuracies) / sum(examples)}
+
+
+def show_app(status_dict, option):
+    app = QtWidgets.QApplication(sys.argv)
+    screen = app.primaryScreen()
+    screen_size = screen.size()
+    viewer = Viewer(status_dict, option, screen_size)
+    viewer.show()
+    app.aboutToQuit.connect(app.deleteLater)
+    sys.exit(app.exec_())
 
 
 def run_server(server_address, config, strategy, status_dict):
@@ -62,14 +67,6 @@ def run_client(server_address, client_id, device, data_size, batch_size, time_de
     sys.exit()
 
 
-def show_app(status_dict):
-    app = QtWidgets.QApplication(sys.argv)
-    window = MyWidget(status_dict)
-    window.show()
-    app.aboutToQuit.connect(app.deleteLater)
-    sys.exit(app.exec_())
-
-
 class Launcher:
 
     def __init__(self, option_file):
@@ -91,10 +88,7 @@ class Launcher:
     def __init_option(self, option_file):
         try:
             with open(option_file, "r") as option_json:
-                option = json.load(option_json)
-                self.option = option
-                self.round_num = option[ROUND_NUM]
-                self.client_options = option[CLIENT_INFO]
+                self.option = json.load(option_json)
         except FileNotFoundError:
             self.logger.error("Invalid option file")
             pass
@@ -102,9 +96,13 @@ class Launcher:
     def __init_status(self):
         manager = Manager()
         self.status_dict = manager.dict()
+        self.status_dict[LOG] = ""
+        self.status_dict[CLIENT_NUM] = len(self.option[CLIENT_OPTIONS])
+        self.status_dict[ROUND_NUM] = self.option[ROUND_NUM]
+        self.status_dict[TRAIN_CNT_OF_ROUND] = 0
 
     def __init_viewer(self):
-        show_prc = Process(target=show_app, args=(self.status_dict,))
+        show_prc = Process(target=show_app, args=(self.status_dict, self.option,))
         self.process_list.append(show_prc)
 
     def __init_server(self):
@@ -114,7 +112,7 @@ class Launcher:
             target=run_server,
             args=(
                 self.server_address,
-                fl.server.ServerConfig(num_rounds=self.round_num),
+                fl.server.ServerConfig(num_rounds=self.status_dict[ROUND_NUM]),
                 strategy,
                 self.status_dict
             )
@@ -125,7 +123,9 @@ class Launcher:
     def __init_clients(self):
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        for client_option in self.client_options:
+        self.client_process_list = []
+
+        for client_option in self.option[CLIENT_OPTIONS]:
             client_proc = Process(
                 target=run_client,
                 args=(
@@ -139,14 +139,16 @@ class Launcher:
                     self.status_dict
                 )
             )
-            self.process_list.append(client_proc)
+            self.client_process_list.append(client_proc)
 
 
     def run(self):
         for process in self.process_list:
             process.start()
             time.sleep(2)
-        for process in self.process_list:
+        for process in self.client_process_list:
+            process.start()
+        for process in (self.process_list + self.client_process_list):
             process.join()
 
 

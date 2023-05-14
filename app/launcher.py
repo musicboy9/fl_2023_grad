@@ -13,7 +13,8 @@ sys.path.append("client")
 
 from client.flower_client import FlowerClient
 
-from viewer.progress_viewer import ProgressViewer
+from viewer.viewer import Viewer
+
 from PyQt5 import QtWidgets
 
 from common_fixture import *
@@ -30,7 +31,7 @@ def weighted_average(metrics: List[ Tuple[ int, Metrics ] ]) -> Metrics:
 
 def show_app(status_dict, option):
     app = QtWidgets.QApplication(sys.argv)
-    viewer = ProgressViewer(status_dict, option)
+    viewer = Viewer(status_dict, option)
     viewer.show()
     app.aboutToQuit.connect(app.deleteLater)
     sys.exit(app.exec_())

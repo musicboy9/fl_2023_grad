@@ -1,14 +1,10 @@
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QPainter, QBrush, QColor
-from collections import defaultdict
-import time
 
 from app.common_fixture import *
 
-MARGIN = 10
 
-
-class ProgressViewer(QtWidgets.QWidget):
+class ProgressLabel(QtWidgets.QWidget):
 
     def __init__(self, status_dict, option):
         super().__init__()
@@ -18,11 +14,6 @@ class ProgressViewer(QtWidgets.QWidget):
         self.__init_option(option)
         self.__init_geometry()
         self.__init_progress_box()
-        self.__init_fetcher()
-
-        self.show()
-
-        self.old_log = self.status_dict[LOG]
 
     def __init_option(self, option):
         self.round_num = option[ROUND_NUM]
@@ -32,13 +23,12 @@ class ProgressViewer(QtWidgets.QWidget):
     def __init_geometry(self):
         self.margin = MARGIN
 
-        self.col_height = 50
+        self.col_height = 100
         self.round_width = 600
-        self.server_width = 100
 
-        window_height = self.client_num * self.col_height + (self.client_num + 1) * self.margin
-        window_width = self.round_width * self.round_num + (self.round_num + 1) * self.margin
-        self.setGeometry(30, 30, window_width, window_height)
+        self.window_height = self.client_num * self.col_height + (self.client_num + 1) * self.margin
+        self.window_width = self.round_width * self.round_num + (self.round_num + 1) * self.margin
+        self.setGeometry(0,0,self.window_width, self.window_height)
         self.max_width = self.geometry().width() - 2 * self.margin
 
     def __init_progress_box(self):
@@ -70,14 +60,6 @@ class ProgressViewer(QtWidgets.QWidget):
                                                                    get_y_pos(client_i),
                                                                    get_width_pos(type),
                                                                    get_height_pos())
-
-    def __init_fetcher(self):
-        self.timer = QtCore.QTimer(self)
-        self.timer.setInterval(1)  # Throw event timeout with an interval of 1000 milliseconds
-        self.timer.timeout.connect(self.fetch)  # each time timer counts a second, call self.blink
-        self.color_flag = True
-
-        self.timer.start()
 
     def __draw_box(self, box_info, progress=False, result=(1, 1)):
         qp = QPainter()
@@ -114,9 +96,8 @@ class ProgressViewer(QtWidgets.QWidget):
                     progress_box_info = tuple(default_box_info)
                     self.__draw_box(progress_box_info, True, (progress, data_len))
 
-    @QtCore.pyqtSlot()
-    def fetch(self):
-        if self.status_dict[LOG] != self.old_log:
-            print(self.status_dict[LOG])
-            self.old_log = self.status_dict[LOG]
-        self.update()
+    def get_width(self):
+        return self.window_width
+
+    def get_height(self):
+        return self.window_height

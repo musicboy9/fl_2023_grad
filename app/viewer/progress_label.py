@@ -28,7 +28,7 @@ class ProgressLabel(QtWidgets.QWidget):
 
         self.window_height = self.client_num * self.col_height + (self.client_num + 1) * self.margin
         self.window_width = self.round_width * self.round_num + (self.round_num + 1) * self.margin
-        self.setGeometry(0,0,self.window_width, self.window_height)
+        self.setGeometry(0, 0, self.window_width, self.window_height)
         self.max_width = self.geometry().width() - 2 * self.margin
 
     def __init_progress_box(self):

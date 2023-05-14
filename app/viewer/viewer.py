@@ -31,6 +31,7 @@ class Viewer(QWidget):
         self.setGeometry(0, 0, self.window_width, self.window_height)
 
         self.progress_label.setMinimumHeight(self.progress_label.get_height())
+        self.progress_label.setMinimumWidth(self.window_width)
 
         self.layout.addWidget(self.progress_label)
 

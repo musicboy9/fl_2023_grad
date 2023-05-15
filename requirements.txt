@@ -1,0 +1,7 @@
+torch~=2.0.0
+torchvision~=0.15.1
+# flwr~=1.4.0
+PyQt5~=5.15.9
+psutil~=5.9.5
+pandas~=2.0.1
+scapy~=2.5.0

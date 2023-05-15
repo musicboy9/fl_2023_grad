@@ -5,18 +5,15 @@ import json
 import time
 import logging
 import flwr as fl
-from flwr.common import Metrics
+from flwr.common import Metrics, date
 from multiprocessing import Process, Manager
 import sys
 
 sys.path.append("client")
 
 from client.flower_client import FlowerClient
-
 from viewer.viewer import Viewer
-
 from PyQt5 import QtWidgets
-
 from common_fixture import *
 
 
@@ -49,13 +46,14 @@ def run_server(server_address, config, strategy, status_dict):
     sys.exit()
 
 
-def run_client(server_address, client_id, device, data_size, batch_size, time_delay, thread_num, status_dict):
+def run_client(server_address, client_id, device, data_size, batch_size, epoch_num, time_delay, thread_num, status_dict):
     fl.client.start_numpy_client(
         server_address=server_address,
         client=FlowerClient(
             device=device,
             data_size=data_size,
             batch_size=batch_size,
+            epoch_num=epoch_num,
             status_dict=status_dict,
             client_id=client_id,
             thread_num=thread_num
@@ -89,6 +87,9 @@ class Launcher:
         try:
             with open(option_file, "r") as option_json:
                 self.option = json.load(option_json)
+                self.client_num = len(self.option[CLIENT_OPTIONS])
+                self.round_num = self.option[ROUND_NUM]
+
         except FileNotFoundError:
             self.logger.error("Invalid option file")
             pass
@@ -96,9 +97,9 @@ class Launcher:
     def __init_status(self):
         manager = Manager()
         self.status_dict = manager.dict()
-        self.status_dict[LOG] = ""
-        self.status_dict[CLIENT_NUM] = len(self.option[CLIENT_OPTIONS])
-        self.status_dict[ROUND_NUM] = self.option[ROUND_NUM]
+        self.status_dict[LOG] = f"{date.now_custom()}, Launcher Initiation\n"
+        self.status_dict[CLIENT_NUM] = self.client_num
+        self.status_dict[ROUND_NUM] = self.round_num
         self.status_dict[TRAIN_CNT_OF_ROUND] = 0
 
     def __init_viewer(self):
@@ -112,7 +113,7 @@ class Launcher:
             target=run_server,
             args=(
                 self.server_address,
-                fl.server.ServerConfig(num_rounds=self.status_dict[ROUND_NUM]),
+                fl.server.ServerConfig(num_rounds=self.round_num),
                 strategy,
                 self.status_dict
             )
@@ -134,6 +135,7 @@ class Launcher:
                     device,
                     client_option[DATA_SIZE],
                     client_option[BATCH_SIZE],
+                    client_option[EPOCH_NUM],
                     client_option[DELAY],
                     client_option[THREAD_NUM],
                     self.status_dict

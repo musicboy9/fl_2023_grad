@@ -1,4 +1,5 @@
 ROUND_NUM = "round_num"
+EPOCH_NUM = "epoch_num"
 CLIENT_OPTIONS = "client_options"
 CLIENT_ID = "client_id"
 THREAD_NUM = "thread_num"
@@ -13,7 +14,7 @@ EVAL = 1
 TYPE_LIST = [ TRAIN, EVAL ]
 
 LOG = "LOG"
-ROUND = "ROUND"
+CURRENT_ROUND = "CURRENT_ROUND"
 TRAIN_CNT_OF_ROUND = "TRAIN_CNT_OF_ROUND"
 
 MARGIN = 10

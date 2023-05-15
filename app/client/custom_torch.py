@@ -34,7 +34,7 @@ class CustomTorch:
         self.status_dict = status_dict
         self.client_id = client_id
         self.thread_num = thread_num
-        self.status_dict[ROUND] = 0
+        self.status_dict[CURRENT_ROUND] = 0
 
     def get_net(self):
         return self.net
@@ -43,9 +43,9 @@ class CustomTorch:
         """Train the model on the training set."""
         data_len = len(trainloader)
 
-        self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=True, start=True)
+        self.status_dict[LOG] += get_log_message(round=self.status_dict[CURRENT_ROUND], client_id=self.client_id, train=True, start=True)
 
-        self.status_dict[ (self.client_id, self.status_dict[ROUND], TRAIN) ] = [ date.now(), 0, data_len ]
+        self.status_dict[ (self.client_id, self.status_dict[CURRENT_ROUND], TRAIN)] = [date.now(), 0, data_len]
 
         torch.set_num_threads(self.thread_num)
         criterion = torch.nn.CrossEntropyLoss()
@@ -54,21 +54,21 @@ class CustomTorch:
             i = 0
             for images, labels in trainloader:
                 i += 1
-                self.status_dict[(self.client_id, self.status_dict[ROUND], TRAIN)] = [date.now(), i, data_len]
+                self.status_dict[(self.client_id, self.status_dict[CURRENT_ROUND], TRAIN)] = [date.now(), i, data_len]
 
                 optimizer.zero_grad()
                 criterion(self.net(images.to(self.device)), labels.to(self.device)).backward()
                 optimizer.step()
 
-        self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=True, start=False)
+        self.status_dict[LOG] += get_log_message(round=self.status_dict[CURRENT_ROUND], client_id=self.client_id, train=True, start=False)
 
     def test(self, testloader):
         """Validate the model on the test set."""
         data_len = len(testloader)
 
-        self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=False, start=True)
+        self.status_dict[LOG] += get_log_message(round=self.status_dict[CURRENT_ROUND], client_id=self.client_id, train=False, start=True)
 
-        self.status_dict[ (self.client_id, self.status_dict[ROUND], EVAL) ] = [ date.now(), 0, data_len ]
+        self.status_dict[ (self.client_id, self.status_dict[CURRENT_ROUND], EVAL)] = [date.now(), 0, data_len]
 
         criterion = torch.nn.CrossEntropyLoss()
         correct, loss = 0, 0.0
@@ -76,7 +76,7 @@ class CustomTorch:
             i = 0
             for images, labels in testloader:
                 i += 1
-                self.status_dict[ (self.client_id, self.status_dict[ROUND], EVAL) ] = [ date.now(), i, data_len ]
+                self.status_dict[ (self.client_id, self.status_dict[CURRENT_ROUND], EVAL)] = [date.now(), i, data_len]
 
                 outputs = self.net(images.to(self.device))
                 labels = labels.to(self.device)
@@ -84,12 +84,12 @@ class CustomTorch:
                 correct += (torch.max(outputs.data, 1)[1] == labels).sum().item()
         accuracy = correct / len(testloader.dataset)
 
-        self.status_dict[LOG] += get_log_message(round=self.status_dict[ROUND], client_id=self.client_id, train=False, start=False)
+        self.status_dict[LOG] += get_log_message(round=self.status_dict[CURRENT_ROUND], client_id=self.client_id, train=False, start=False)
 
         self.status_dict[TRAIN_CNT_OF_ROUND] += 1
         if self.status_dict[TRAIN_CNT_OF_ROUND] == self.status_dict[CLIENT_NUM]:
             # round done
-            self.status_dict[ROUND] += 1
+            self.status_dict[CURRENT_ROUND] += 1
             self.status_dict[ TRAIN_CNT_OF_ROUND ] = 0
         return loss, accuracy
 
@@ -105,5 +105,4 @@ class CustomTorch:
         custom_data_test_len = int(len(testset) * self.data_size)
         custom_testset = torch.utils.data.random_split(testset, [custom_data_test_len, len(testset) - custom_data_test_len])[0]
 
-        self.status_dict[(self.client_id, "data_size")] = (self.data_size)
         return DataLoader(custom_trainset, batch_size=self.batch_size, shuffle=True), DataLoader(custom_testset)

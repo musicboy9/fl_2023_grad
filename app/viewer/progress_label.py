@@ -18,7 +18,7 @@ class ProgressLabel(QtWidgets.QWidget):
     def __init_option(self, option):
         self.round_num = option[ROUND_NUM]
         self.client_options = option[CLIENT_OPTIONS]
-        self.client_num = self.status_dict[CLIENT_NUM]
+        self.client_num = len(self.client_options)
 
     def __init_geometry(self):
         self.margin = MARGIN

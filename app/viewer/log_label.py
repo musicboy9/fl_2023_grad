@@ -22,4 +22,5 @@ class LogLabel(QScrollArea):
     def set_text(self, text):
         self.label.clear()
         self.label.setText(text)
+        self.verticalScrollBar().setSliderPosition(self.label.height())
 

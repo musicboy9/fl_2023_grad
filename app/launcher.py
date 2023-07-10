@@ -4,8 +4,8 @@ from typing import List, Tuple
 import json
 import time
 import logging
-import flwr as fl
-from flwr.common import Metrics, date
+import flwr_custom as fl
+from flwr_custom.common import Metrics, date
 from multiprocessing import Process, Manager
 import sys
 

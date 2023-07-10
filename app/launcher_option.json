@@ -1,5 +1,5 @@
 {
-  "round_num": 5,
+  "round_num": 1,
   "client_options": [
     {
       "client_id": 0,
@@ -16,30 +16,6 @@
       "epoch_num": 5,
       "data_size": 0.3,
       "delay": 2.0
-    },
-    {
-      "client_id": 2,
-      "thread_num": 4,
-      "batch_size": 32,
-      "epoch_num": 5,
-      "data_size": 0.4,
-      "delay": 1.0
-    },
-    {
-      "client_id": 3,
-      "thread_num": 4,
-      "batch_size": 32,
-      "epoch_num": 5,
-      "data_size": 0.2,
-      "delay": 1.0
-    },
-    {
-      "client_id": 4,
-      "thread_num": 6,
-      "batch_size": 32,
-      "epoch_num": 5,
-      "data_size": 0.1,
-      "delay": 5.0
     }
   ]
 }

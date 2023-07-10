@@ -1,7 +1,7 @@
 import flwr_custom as fl
 import torch
 from collections import OrderedDict
-from custom_torch import CustomTorch
+from app.client.custom_torch import CustomTorch
 
 
 # Define Flower client

@@ -1,4 +1,4 @@
-import flwr as fl
+import flwr_custom as fl
 import torch
 from collections import OrderedDict
 from custom_torch import CustomTorch

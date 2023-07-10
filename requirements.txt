@@ -1,7 +1,7 @@
-torch~=2.0.0
-torchvision~=0.15.1
-flwr_custom=0.1.2
-PyQt5~=5.15.9
-psutil~=5.9.5
-pandas~=2.0.1
-scapy~=2.5.0
+torch==2.0.0
+torchvision==0.15.1
+flwr_custom==0.1.2
+PyQt5==5.15.9
+psutil==5.9.5
+pandas==2.0.1
+scapy==2.5.0

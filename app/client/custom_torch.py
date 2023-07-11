@@ -2,7 +2,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
-from flwr_custom.common import date
+from flwr.common import date
 from app.client.net import Net
 from app.common_fixture import *
 
@@ -97,11 +97,11 @@ class CustomTorch:
         """Load CIFAR-10 (training and test set)."""
         trf = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
-        trainset = CIFAR10("./data", train=True, download=True, transform=trf)
+        trainset = CIFAR10("../app/data", train=True, download=True, transform=trf)
         custom_data_train_len = int(len(trainset) * self.data_size)
         custom_trainset = torch.utils.data.random_split(trainset, [custom_data_train_len, len(trainset) - custom_data_train_len])[0]
 
-        testset = CIFAR10("./data", train=False, download=True, transform=trf)
+        testset = CIFAR10("../app/data", train=False, download=True, transform=trf)
         custom_data_test_len = int(len(testset) * self.data_size)
         custom_testset = torch.utils.data.random_split(testset, [custom_data_test_len, len(testset) - custom_data_test_len])[0]
 

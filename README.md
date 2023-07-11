@@ -17,7 +17,6 @@ Based on [Flower](https://github.com/adap/flower)
 git clone https://github.com/musicboy9/fl_viewer.git
 cd fl_viewer/scripts
 sh setup.sh
-sh run.sh
 ```
 
 ### How to Run

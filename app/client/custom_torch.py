@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader
 from torchvision.datasets import CIFAR10
 from torchvision.transforms import Compose, Normalize, ToTensor
 from flwr_custom.common import date
-from net import Net
+from app.client.net import Net
 from app.common_fixture import *
 
 

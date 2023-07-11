@@ -7,13 +7,12 @@ import logging
 import flwr_custom as fl
 from flwr_custom.common import Metrics, date
 from multiprocessing import Process, Manager
+from PyQt5 import QtWidgets
 import sys
-
-sys.path.append("client")
+import argparse
 
 from client.flower_client import FlowerClient
 from viewer.viewer import Viewer
-from PyQt5 import QtWidgets
 from common_fixture import *
 
 
@@ -92,7 +91,7 @@ class Launcher:
 
         except FileNotFoundError:
             self.logger.error("Invalid option file")
-            pass
+            sys.exit()
 
     def __init_status(self):
         manager = Manager()
@@ -155,5 +154,12 @@ class Launcher:
 
 
 if __name__ == "__main__":
-    launcher = Launcher("launcher_option.json")
-    launcher.run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-o", "--Option", help="Launcher Option")
+
+    args = parser.parse_args()
+    if args.Option:
+        launcher = Launcher(args.Option)
+        launcher.run()
+
+

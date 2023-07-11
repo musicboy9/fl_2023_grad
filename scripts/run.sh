@@ -1,3 +1,4 @@
 #!/bin/bash
 
-../venv/bin/python ../app/launcher.py
+export PYTHONPATH=../
+../venv/bin/python ../app/launcher.py --Option ../app/launcher_option.json

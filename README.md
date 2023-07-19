@@ -1,5 +1,7 @@
 # FL Viewer
 
+Keywords: Federated Learning, PyQt5, gRPC, PyTorch
+
 ### Summary
 FL Viewer is a visualized simulation of federated learning, especially with
 various client environment.
@@ -67,10 +69,6 @@ when a message is sent to the server and get a response.
   ]
 }
 ```
-
-
-
-Keywords: FL, PyQt5, gRPC
 
 2023 Undergraduate Graduation Project @ SNU
 
